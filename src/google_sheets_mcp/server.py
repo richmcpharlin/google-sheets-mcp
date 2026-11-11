@@ -16,6 +16,7 @@ from .a1 import a1_to_grid_range, split_sheet_and_range
 from .client import SheetsClient
 from .colors import parse_color
 from .config import mode as _mode
+from .formatting import FORMAT_FIELDS, assert_bounded_range, runs_from_grid
 from .refs import resolve_spreadsheet_id
 
 # ---------------------------------------------------------------------------
@@ -871,6 +872,36 @@ def batch_clear(spreadsheet_id: str, ranges: list[str]) -> dict:
 # ---------------------------------------------------------------------------
 # Cell formatting
 # ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def read_formatting(
+    spreadsheet_id: str,
+    range: str,
+    include_defaults: bool = False,
+) -> dict:
+    """Read the formatting you see in a bounded A1 range.
+
+    Adjacent cells with the same formatting come back as one run, so a yellow
+    bold header is a single range instead of one entry per cell. Colors are
+    ``#rrggbb`` from the effective format, which includes conditional formatting.
+
+    White backgrounds, black text, and the default 10pt font are left out.
+    A run is returned when a cell has a color, bold/italic/underline/
+    strikethrough, a number format, or a note. Set ``include_defaults`` to
+    keep the plain cells too.
+
+    The range must be bounded (``A1:C20``, not ``A:C``) and at most 2500 cells.
+    """
+    assert_bounded_range(range)
+    response = _api(
+        current_client().spreadsheets.get,
+        spreadsheetId=_sid(spreadsheet_id),
+        ranges=[range],
+        includeGridData=True,
+        fields=FORMAT_FIELDS,
+    )
+    return {"range": range, "runs": runs_from_grid(response, include_defaults)}
 
 
 @mcp.tool()

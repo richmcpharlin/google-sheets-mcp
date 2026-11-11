@@ -58,6 +58,8 @@ The low-level wrappers below remain available for precise control.
   `text_to_columns`, `randomize_range`
 
 **Formatting**
+- `read_formatting` — read displayed colors, emphasis, number formats, and notes
+  for a bounded range, collapsed into rectangular runs
 - `format_cells` — bold/italic/underline/strikethrough, font size & family,
   text & background color, horizontal/vertical alignment, wrap strategy, number formats
 - `set_borders` — outer + inner borders, styles, colors
